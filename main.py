@@ -1,5 +1,4 @@
 import datetime
-import dotenv
 import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
@@ -9,47 +8,113 @@ load_dotenv()
 mongo_uri = os.getenv("MONGO_URI")
 db_name = os.getenv("DB_NAME")
 client = MongoClient(mongo_uri)
-db = client["butceDB"]
+db = client["budgetDB"]
 
 print(f"Database successfully connected: {db.name}")
-koleksiyon = db["harcamalar"]
+collection = db["expenses"]
+
 while True:
-    print("\n1. Yeni Harcama Ekle")
-    print("2. Tüm Harcamaları Listele ve Toplamı Gör")
-    print("3. Çıkış")
+    print("\n1. Add New Expense")
+    print("2. List All Expenses and View Total")
+    print("3. Exit")
     
-    secim = input("\nYapmak istediğiniz işlemi seçin (1/2/3): ")
+    choice = input("\nSelect the operation you want to perform (1/2/3): ")
 
-    if secim == "1":
+    if choice == "1":
         try:
-            tt = input("Harcama başlığını giriniz: ")
-            pr = float(input("Harcama tutarını giriniz: "))
-            cat = input("Harcama kategorisini giriniz: ")
+            title = input("Enter expense title: ")
+            price = float(input("Enter expense amount: "))
+            category = input("Enter expense category: ")
 
-            butceDB = {
-            "kategori": cat,
-            "baslik": tt,
-            "fiyat": pr,
-            "olusturulma_tarihi": datetime.now()}
-            sonuc = koleksiyon.insert_one(butceDB)
-            print(f"Kayıt başarıyla eklendi! ID: {sonuc.inserted_id}")
+            expense_record = {
+                "category": category,
+                "title": title,
+                "price": price,
+                "created_at": datetime.now()
+            }
+            result = collection.insert_one(expense_record)
+            print(f"Record successfully added! ID: {result.inserted_id}")
         except ValueError:
-            print("!!! Hata: Tutar kısmına sadece sayı girmelisiniz.")
-    elif secim == "2":
-        tum_harcamalar = koleksiyon.find()
-        for harcama in tum_harcamalar:
-            print(f"Başlık: {harcama['baslik']} | Tutar: {harcama['fiyat']} TL | Kategori: {harcama['kategori']} | Tarih: {harcama['olusturulma_tarihi']}")
-        toplam_tutar = 0
-        print("\n--- HARCAMA RAPORU ---")
-        for harcama in tum_harcamalar:
-            tutar = harcama["fiyat"]
-            toplam_tutar += tutar
-            print(f"• {harcama['baslik']}: {tutar} TL")
-            print("-" * 20)
-            print(f"TOPLAM HARCAMANIZ: {toplam_tutar} TL")
-            print("-" * 20)
-    elif secim == "3":
-        print("Programdan çıkılıyor... İyi günler!")
+            print("!!! Error: You must enter only numbers for the amount.")
+            
+    elif choice == "2":
+        all_expenses = list(collection.find())
+        
+        for expense in all_expenses:
+            print(f"Title: {expense['title']} | Amount: {expense['price']} TL | Category: {expense['category']} | Date: {expense['created_at']}")
+            
+        total_amount = 0
+        print("\n--- EXPENSE REPORT ---")
+        for expense in all_expenses:
+            amount = expense["price"]
+            total_amount += amount
+            print(f"• {expense['title']}: {amount} TL")
+            
+        print("-" * 20)
+        print(f"YOUR TOTAL EXPENDITURE: {total_amount} TL")
+        print("-" * 20)
+        
+    elif choice == "3":
+        print("Exiting program... Have a good day!")
         break
     else:
-        print("Geçersiz seçim! Lütfen 1, 2 veya 3 giriniz.")
+import datetime
+import os
+from pymongo import MongoClient
+from dotenv import load_dotenv
+from datetime import datetime
+
+load_dotenv()
+mongo_uri = os.getenv("MONGO_URI")
+db_name = os.getenv("DB_NAME")
+client = MongoClient(mongo_uri)
+db = client["budgetDB"]
+
+print(f"Database successfully connected: {db.name}")
+collection = db["expenses"]
+
+while True:
+    print("\n1. Add New Expense")
+    print("2. List All Expenses and View Total")
+    print("3. Exit")
+    
+    choice = input("\nSelect the operation you want to perform (1/2/3): ")
+
+    if choice == "1":
+        try:
+            title = input("Enter expense title: ")
+            price = float(input("Enter expense amount: "))
+            category = input("Enter expense category: ")
+
+            expense_record = {
+                "category": category,
+                "title": title,
+                "price": price,
+                "created_at": datetime.now()
+            }
+            result = collection.insert_one(expense_record)
+            print(f"Record successfully added! ID: {result.inserted_id}")
+        except ValueError:
+            print("!!! Error: You must enter only numbers for the amount.")
+            
+    elif choice == "2":
+        all_expenses = list(collection.find())
+        
+        for expense in all_expenses:
+            print(f"Title: {expense['title']} | Amount: {expense['price']} TL | Category: {expense['category']} | Date: {expense['created_at']}")
+            
+        total_amount = 0
+        print("\n--- EXPENSE REPORT ---")
+        for expense in all_expenses:
+            amount = expense["price"]
+            total_amount += amount
+            print(f"• {expense['title']}: {amount} TL")
+            
+        print("-" * 20)
+        print(f"YOUR TOTAL EXPENDITURE: {total_amount} TL")
+        print("-" * 20)
+        
+    elif choice == "3":
+        print("Exiting program... Have a good day!")
+        break
+    else:
